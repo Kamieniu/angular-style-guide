@@ -379,7 +379,8 @@ public ngOnInit(): void {
 </ul>
 ```
 
-> Note: Always use trackBy function to avoid duplications or unnecessary re-rednering elements
+> Note: Always use trackBy function to avoid duplications or unnecessary re-rednering elements <a name="performance--trackBy"></a><a name="9.1">
+> More </a>
 
 ## Immutable <a name="immutable"></a><a name="7.0"></a>[7.0](#immutable)
 
