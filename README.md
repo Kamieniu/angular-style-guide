@@ -10,9 +10,9 @@
 3. [Public API](#public-api)
 4. [HTML Templates](#html-templates)
 5. [Styles](#styles)
-6. [Styling Name Convention](#styling-name-convention)
-7. [Types and Interfaces](#types-and-interfaces)
-8. [RxJS](#rxjs)
+6. [RxJS](#rxjs)
+7. [Immutable](#immutable)
+8. [Types and Interfaces](#types-and-interfaces)
 9. [Performance](#performance) 10. [Testing](#testing)
 10. [PWA](#PWA)
 11. [TSLint](#tslint)
@@ -47,7 +47,7 @@ Files Structure should be divided, clear and understandable.
 - <a name="files-structure-and-name-conventions--containers"></a><a name="1.2"></a>[1.2](#files-structure-and-name-conventions--containers) **Containers**:
   Containers are wrappers for components. They provice all API connections, pass data, etc.
 
-Examples:
+  Examples:
 
 - forms
 - gallery
@@ -96,31 +96,34 @@ Examples:
 
   Modules are boxes 📦 for some piece of code. It allows to share component declaraions, pipes, modules between modules in the application.
 
-  ```
-    import { NgModule } from '@angular/core';
-    import { CommonModule } from '@angular/common';
+```
+  import { NgModule } from '@angular/core';
+  import { CommonModule } from '@angular/common';
 
-    // Modules
-    import { ButtonsModule, FormsModule } from 'app/components';
+  // Modules
+  import { ButtonsModule, FormsModule } from 'app/components';
 
-    // Components
-    import { ComponentA } from './component-a.component';
-    import { ComponentB } from './component-b.component';
+  // Components
+  import { ComponentA } from './component-a.component';
+  import { ComponentB } from './component-b.component';
 
-    const EXPORTS = [ComponentA, ComponentB];
+  const EXPORTS = [ComponentA, ComponentB];
 
-    const UI_MODULES [ButtonsModule, FormsModule];
+  const UI_MODULES [ButtonsModule, FormsModule];
 
-    @NgModule({
-      imports: [
-        CommonModule,
-        ...UI_MODULES,
-      ],
-      declarations: [...EXPORTS],
-      exports: [...EXPORTS]
-    })
-    export class CModule { }
-  ```
+  @NgModule({
+    imports: [
+      CommonModule,
+      ...UI_MODULES,
+    ],
+    declarations: [...EXPORTS],
+    exports: [...EXPORTS]
+  })
+  export class CModule { }
+```
+
+> IMPORTANT
+> **Routing modules should be loaded as LazyModules!**
 
 - <a name="files-structure-and-name-conventions--services"></a><a name="1.5"></a>[1.5](#files-structure-and-name-conventions--services) **Services**:
   Services are usually used to consume some API, deliver some data or share data between components (not recommended - use Store instead)
@@ -296,6 +299,195 @@ That's why I would suggest that you keep your templates inside your components w
 > https://marketplace.visualstudio.com/itemstemName=natewallace.angular2-inline
 > that helps you to format HTML code in your .ts files
 
+## Styles <a name="styles"></a><a name="5.0"></a>[5.0](#styles)
+
+These points should be covered:
+
+- each component has own .scss/.css file
+- ViewEncapsulation is set on Native or Default,
+- Styles has separate file that's been imported
+- Styles uses BEM/OOCSS style guide
+- All frameworks are imported in main `styles.scss/.css` files
+- Class names are understandable
+- Do not query by Tag names
+
+More: https://github.com/airbnb/css
+
+## RxJS <a name="rxjs"></a><a name="6.0"></a>[6.0](#rxjs)
+
+### Unsubscribe
+
+To avoid “memory leak” each component should unsubscribe all subscriptions in ngOnDestroy hook
+
+```javascript
+someSubscription1 : Subscription;
+someSubscription2 : Subscription;
+
+ngOnInit() {
+  this.someSubscription1 = ...subscribe(...);
+  this.someSubscription2 = ...subscribe(...);
+}
+
+ngOnDestroy() {
+  if (this.someSubscription1) {
+    this.someSubscription1.unsubscribe();
+  }
+
+  if (this.someSubscription2) {
+    this.someSubscription2.unsubscribe();
+  }
+
+}
+```
+
+We can easily manage it with:
+
+```javascript
+someSubscriptions : new Subscription();
+
+ngOnInit() {
+  this.someSubscriptions.add(...subscribe(...));
+  this.someSubscriptions.add(...subscribe(...));
+}
+ngOnDestroy() {
+  this.someSubscriptions.unsubscribe();
+}
+```
+
+### Async Pipe
+
+Recommended way to handle Observables in HTML is using async pipes provided by angular.
+Async pipe automaticly unsubscribe if component is destroyed.
+
+```javascript
+
+// Component code
+
+public dataToDisplay$: Observable<Array<DataType>>
+constructor(public readonly service: Service){}
+
+public ngOnInit(): void {
+  this.dataToDisplay$ = this.service.getData();
+}
+```
+
+```html
+<ul class="list">
+	<li class="list__element" *ngFor="let element of dataToDisplay$ | async">
+		{{element?.name}}
+	</li>
+</ul>
+```
+
+> Note: Always use trackBy function to avoid duplications or unnecessary re-rednering elements
+
+## Immutable <a name="immutable"></a><a name="7.0"></a>[7.0](#immutable)
+
+Basically it comes down to the fact that immutability increases predictability, performance (indirectly) and allows for mutation tracking.
+
+**Predictability**
+
+Mutation hides change, which create (unexpected) side effects, which can cause nasty bugs. When you enforce immutability you can keep your application architecture and mental model simple, which makes it easier to reason about your application.
+
+**Performance**
+
+Even though adding values to an immutable Object means that a new instance needs to be created where existing values need to be copied and new values need to be added to the new Object which cost memory, immutable Objects can make use of structural sharing to reduce memory overhead.
+All updates return new values, but internally structures are shared to drastically reduce memory usage (and GC thrashing). This means that if you append to a vector with 1000 elements, it does not actually create a new vector 1001-elements long. Most likely, internally only a few small objects are allocated.
+You can read more about this here.
+
+**Mutation Tracking**
+
+Besides reduced memory usage, immutability allows you to optimize your application by making use of reference- and value equality. This makes it really easy to see if anything has changed. For example a state change in a react component. You can use shouldComponentUpdate to check if the state is identical by comparing state Objects and prevent unnecessary rendering. You can read more about this here.
+
+**Bad**
+
+```javascript
+const person = {
+	name: "Frank",
+	age: "22",
+};
+
+person.name = "Will"; // DONT!
+```
+
+**Good**
+
+```javascript
+const updated_person = {
+	...person,
+	name: "Will", // CORRECT
+};
+```
+
+## Performance <a name="performance"></a><a name="9.0"></a>[9.0](#performance)
+
+### TrackBy Function <a name="performance--trackBy"></a><a name="9.1"></a>[9.1](#performance--trackBy)
+
+Imagine that we are trying to display an editable table with many rows. In case of changing single row, angular has to re render all DOM (component related) again.
+
+```html
+<table>
+	<tr *ngFor="let car of cars; trackBy: trackByCarId">
+		<td>{{ car.id }}</td>
+	</tr>
+</table>
+```
+
+```javascript
+trackByCarId(index: number, car: Car) {
+  return car.id; // or index
+}
+```
+
+### Update onBlur <a name="performance--onBlur"></a><a name="9.2"></a>[9.2](#performance--onBlur)
+
+Angular by default runs validation process every time when FormControl value changes.
+Many callbacks run because of single letter in the input. We can easily run our validation onBlur.
+
+```javascript
+this.email = new FormControl(null, { updateOn: "blur" });
+```
+
+We can also run our validation after submitting the form with `updateOn: submit`.
+
+Now Angular can follow only changes by unique identifier and destroy / build elements without re rendering elements that didn’t change.
+
+### @Input() setter <a name="performance--input-setter"></a><a name="9.2"></a>[9.2](#performance--input-setter)
+
+Angular share a ngOnChanges hook that runs every time Input() gets a new value. The problem is, we usually have many inputs, which in this case it’s not optimal. If we want to run some code based on the input we should do it via setter.
+
+```javascript
+@Input() set someInput(value) {
+  this.runSomeFunction();
+}
+```
+
+**IMPORTANT**
+In the case of relations between the imports, it’s very important to pay attention on ordering them in the correct way.
+
+### Change detection Ref <a name="performance--change-detection-ref"></a><a name="9.3"></a>[9.3](#performance--change-detection-ref)
+
+Angular allows to manually detect changes in component. ChangeDetectorRef is usually used to detect changes along with the OnPush strategy. ChangeDetectorRef has a method for it `detach();` which detach component from the ChangeDetectors tree.
+
+```javascript
+constructor(private readonly changeDetector: ChangeDetectorRef) {
+  this.changeDetector.detach();
+}
+```
+
+We can also manually run detection system at any moment in the component with `detectChanges()` method (it checks components and his children) or `markForCheck()` (it checks all components from root until this component).
+
+### Change Detection Strategy <a name="performance--change-detection-strategy"></a><a name="9.4"></a>[9.4](#performance--change-detection-strategy)
+
+Most important method to increase an application performance. In shortcut, change detection will be triggered only if Input() object reference would change or component would emit some event. It’s perfect to use in “dummy” components - presentation only.
+
+```javascript
+@Component({
+  ...
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+```
+
 ## License
 
 (The MIT License)
@@ -322,9 +514,3 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **[⬆ back to top](#table-of-contents)**
-
-## Amendments
-
-We encourage you to fork this guide and change the rules to fit your team’s style guide. Below, you may list some amendments to the style guide. This allows you to periodically update your style guide without having to deal with merge conflicts.
-
-# };
