@@ -28,7 +28,7 @@ Files Structure should be divided, clear and understandable.
 - <a name="files-structure-and-name-conventions--components"></a><a name="1.1"></a>[1.1](#files-structure-and-name-conventions--components) **Components**:
   It's a simple, single block of reusable (or not) code that represents some UI and logic. The best way is to keep our components "dummy" - not connected to the API, services, store, etc. All data should be served by parents (containers)
 
-```
+```bash
   |- Components
   |-- [component-name]
   |--- [component-name].component.ts
@@ -54,7 +54,7 @@ Files Structure should be divided, clear and understandable.
 - gallery
 - articles + images
 
-```
+```bash
   ...
   |- Containers
   |-- B-name
@@ -76,7 +76,7 @@ Files Structure should be divided, clear and understandable.
 
   Views are representation of each page visible for user (connected with routes and/or lazy loading modules). Views are wrapper for containers/components and provide most important APIs connections.
 
-```
+```bash
   |- views
   |-- [page-name]-view
   |--- [page-name]-routing.module.ts
@@ -129,7 +129,7 @@ Files Structure should be divided, clear and understandable.
 - <a name="files-structure-and-name-conventions--services"></a><a name="1.5"></a>[1.5](#files-structure-and-name-conventions--services) **Services**:
   Services are usually used to consume some API, deliver some data or share data between components (not recommended - use Store instead)
 
-```
+```bash
   |- Services
   |-- [service-name]
   |--- [service-name].service.ts
@@ -141,7 +141,7 @@ Files Structure should be divided, clear and understandable.
 - <a name="files-structure-and-name-conventions--pipes"></a><a name="1.6"></a>[1.6](#files-structure-and-name-conventions--pipes) **Pipes**:
   Filters, sanitizers for our code.
 
-```
+```bash
   |- Pipes
   |-- [pipe-name]
   |--- [pipe-name].pipe.ts
@@ -164,6 +164,7 @@ Files Structure should be divided, clear and understandable.
 ```
 
 **Export**: All files should be exported by `index.ts`.
+
 **Access**:`tsconfig.json` should have applied aliases for paths.
 
 ```javascript
@@ -417,6 +418,12 @@ const updated_person = {
 };
 ```
 
+## Types and Interfaces <a name="types-and-interfaces"></a><a name="8.0"></a>[8.0](#types-and-interfaces)
+
+All types and interfaces should be stored in one place (example `src/interfaces/`) to provide SSOT (single source of truth) and use public API to avoid long import paths.
+
+TSLint should take care of the rest.
+
 ## Performance <a name="performance"></a><a name="9.0"></a>[9.0](#performance)
 
 ### TrackBy Function <a name="performance--trackBy"></a><a name="9.1"></a>[9.1](#performance--trackBy)
@@ -485,6 +492,137 @@ Most important method to increase an application performance. In shortcut, chang
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 ```
+
+### Testing <a name="testing"></a><a name="10"></a>[10](#testing)
+
+To avoid bugs while developing features important is to write Unit & Integrations tests.
+
+Instead of using build in config we can easily use
+a NPM package (https://github.com/getsaf/shallow-render)
+
+Instead of doing this:
+
+```javascript
+describe("MyComponent", () => {
+	beforeEach(async => {
+		return TestBed.configureTestModule({
+			imports: [SomeModuleWithDependencies],
+			declarations: [
+				TestHostComponent,
+				MyComponent, // <-- All I want to do is test this!!
+				// We either must list all our dependencies here
+				// -- OR --
+				// Use NO_ERRORS_SCHEMA which allows any HTML to be used
+				// even if it is invalid!
+				ButtonComponent,
+				LinkComponent,
+				FooDirective,
+				BarPipe,
+			],
+			providers: [MyService],
+		})
+			.compileComponents()
+			.then(() => {
+				let myService = TestBed.get(MyService); // Not type safe
+				spyOn(myService, "foo").and.returnValue("mocked foo");
+			});
+	});
+
+	it("renders a link with the provided label text", () => {
+		const fixture = TestBed.createComponent(TestHostComponent);
+		fixture.componentInstance.labelText = "my text";
+		fixture.detectChanges();
+		const link = fixture.debugElement.query(By.css("a"));
+
+		expect(a.nativeElement.innerText).toBe("my text");
+	});
+
+	it('sends "foo" to bound click events', () => {
+		const fixture = TestBed.createComponent(TestHostComponent);
+		spyOn(fixture.componentInstance, "handleClick");
+		fixture.detectChanges();
+		const myComponentElement = fixture.debugElement.query(
+			By.directive(MyComponent)
+		);
+		myComponentElement.click();
+
+		expect(fixture.componentInstance.handleClick).toHaveBeenCalledWith("foo");
+	});
+});
+
+@Component({
+	template: `
+    <my-component [linkText]="linkText" (click)="handleClick($event)">
+    </my-component>
+  `,
+})
+class TestHostComponent {
+	linkLabel: string;
+	handleClick() {}
+}
+```
+
+we can easily do this
+
+```javascript
+describe("MyComponent", () => {
+	let shallow: Shallow<MyComponent>;
+
+	beforeEach(() => {
+		shallow = new Shallow(MyComponent, MyModule);
+	});
+
+	it("renders a link with the provided label text", async () => {
+		const { find } = await shallow.render({ bind: { linkText: "my text" } });
+		// or shallow.render(`<my-component linkText="my text"></my-component>`);
+
+		expect(find("a").nativeElement.innerText).toBe("my text");
+	});
+
+	it('sends "foo" to bound click events', async () => {
+		const { element, outputs } = await shallow.render();
+		element.click();
+
+		expect(outputs.handleClick).toHaveBeenCalledWith("foo");
+	});
+});
+```
+
+### Each component should have at least Unit tests to cover all methods.
+
+> **We expect to have at least 80-85% test coverage.**
+
+## PWA <a name="pwa"></a><a name="11"></a>[11](#pwa)
+
+> source
+> https://angular.io/guide/service-worker-intro > https://developers.google.com/web/progressive-web-apps/
+
+Angular applications, as single-page applications, are in a prime position to benefit from the advantages of service workers. Starting with version 5.0.0, Angular ships with a service worker implementation. Angular developers can take advantage of this service worker and benefit from the increased reliability and performance it provides, without needing to code against low-level APIs.
+
+### Create an installable PWA
+
+To make your Angular application a PWA, all you need to do is run a single command:
+
+```bash
+ng add @angular/pwa
+```
+
+This command will:
+
+Create a service worker with a default caching configuration.
+Create a manifest file, which tells the browser how your app should behave when installed on the user's device.
+Add a link to the manifest file in `index.html.`
+Add the theme-color `<meta>` tag to `index.html.`
+Create app icons in the `src/assets` directory.
+
+### Precache
+
+https://web.dev/precaching-with-the-angular-service-worker/
+
+## TSLint <a name="tslint"></a><a name="12"></a>[12](#tslint)
+
+Project should have configured TSLint to provide the best code quality.
+https://www.npmjs.com/package/angular-tslint-rules
 
 ## License
 
