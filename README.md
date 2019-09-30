@@ -13,10 +13,11 @@
 6. [RxJS](#rxjs)
 7. [Immutable](#immutable)
 8. [Types and Interfaces](#types-and-interfaces)
-9. [Performance](#performance) 10. [Testing](#testing)
-10. [PWA](#PWA)
-11. [TSLint](#tslint)
-12. [Classes & Constructors](#classes--constructors)
+9. [Performance](#performance)
+10. [Testing](#testing)
+11. [PWA](#PWA)
+12. [TSLint](#tslint)
+13. [Classes & Constructors](#classes--constructors)
 
 ## Files Structure and Name Conventions <a name="files-structure-and-name-conventions"></a><a name="1.1"></a>[1.1](#files-structure-and-name-conventions)
 
@@ -154,7 +155,7 @@ Files Structure should be divided, clear and understandable.
 - <a name="files-structure-and-name-conventions--interfaces"></a><a name="1.7"></a>[1.7](#files-structure-and-name-conventions--interfaces) **Interfaces**:
   With interfaces we define types of our data.
 
-```
+```bash
   |- Interfaces
   |-- [interface-name]
   |--- [interface-name].interface.ts
@@ -165,21 +166,17 @@ Files Structure should be divided, clear and understandable.
 **Export**: All files should be exported by `index.ts`.
 **Access**:`tsconfig.json` should have applied aliases for paths.
 
-````javascript
-    ...
-    "paths: {
-      "app/components": ["src/components/index.ts"],
-      "app/services": ["src/services/index.ts"],
-      ...
-    }
-    ```
+```javascript
+      "paths: {
+        "app/components": ["src/components/index.ts"],
+        "app/services": ["src/services/index.ts"],
+        ...
+      }
+```
 
-    so later on all files are accessable by
-
-    ``` javascript
-    import { ServiceA } from 'app/services'
-    ....
-````
+```javascript
+import { ServiceA } from "app/services";
+```
 
 **[⬆ back to top](#files-structure-and-name-conventions)**
 
