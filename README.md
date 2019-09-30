@@ -180,11 +180,9 @@ Examples:
 
 **[⬆ back to top](#files-structure-and-name-conventions)**
 
-## Creating new blocks - Angular CLI
+## Creating new blocks - Angular CLI <a name="creating-new-blocks-angular-cli"></a><a name="2.0"></a>[1.1](#creating-new-blocks-angular-cli)
 
-<a name="creating-new-blocks-angular-cli"></a><a name="2.1"></a>
-
-- [2.1](#creating-new-blocks-angular-cli) Angular CLI is a powerfull tool. It does not only accelerates our work but also keep all files in the same "shape".
+Angular CLI is a powerfull tool. It does not only accelerates our work but also keep all files in the same "shape".
 
 ### To generate component/group in our file structure
 
@@ -219,7 +217,7 @@ ng g i interfaces/[interface-name]
 
 **[⬆ back to top](#creating-new-blocks-angular-cli)**
 
-## Public API <a name="public-api"></a><a name="3.1"></a>[3.1](#public-api)
+## Public API <a name="public-api"></a><a name="3.0"></a>[3.0](#public-api)
 
 > Why?
 > To keep our import paths simple and clean.
@@ -276,6 +274,27 @@ import {module} from 'app/helpers';
 ...
 
 ```
+
+## HTML Templates <a name="html-templates"></a><a name="4.0"></a>[4.0](#html-templates)
+
+There are 2 ways to write html code in Angular application.
+There's no real difference between having an embedded template and an external template.
+
+**For the developer, however, there are a number of differences that you have to consider.**
+
+You get better code completion and inline support in your editor/IDE in most cases when the HTML is in a separate .html file. (IntelliJ IDEA, at least, supports HTML for inline templates and strings)
+There is a convenience factor to having code and the associated HTML in the same file. It's easier to see how the two relate to each other.
+These two things will be of equal value for many people, so you'd just pick your favorite and move ahead with life if this were all there was to it.
+But that leads us to the reasons you should keep your templates in your components, in my opinion:
+It is difficult to make use of relative filepaths for external templates as it currently stands in Angular 2.
+Using non-relative paths for external templates makes your components far less portable, since you need to manage all of the /where/is/my/template type references from the root that change depending on how deep your component is.
+That's why I would suggest that you keep your templates inside your components where they are easily found. Also, if you find that your inline template is getting large and unwieldy, then it is probably a sign that you should be breaking your component down into several smaller components, anyway.
+
+**My own opion is to keep Component Template as a inline html. This way we force ourself to keep component's code small.**
+
+> If you use VScode to produce code I suggest to install this extension:
+> https://marketplace.visualstudio.com/itemstemName=natewallace.angular2-inline
+> that helps you to format HTML code in your .ts files
 
 ## License
 
