@@ -281,7 +281,7 @@ import {module} from 'app/helpers';
 There are 2 ways to write html code in Angular application.
 There's no real difference between having an embedded template and an external template.
 
-**For the developer, however, there are a number of differences that you have to consider.**
+"...**For the developer, however, there are a number of differences that you have to consider.**
 
 You get better code completion and inline support in your editor/IDE in most cases when the HTML is in a separate .html file. (IntelliJ IDEA, at least, supports HTML for inline templates and strings)
 There is a convenience factor to having code and the associated HTML in the same file. It's easier to see how the two relate to each other.
@@ -289,7 +289,9 @@ These two things will be of equal value for many people, so you'd just pick your
 But that leads us to the reasons you should keep your templates in your components, in my opinion:
 It is difficult to make use of relative filepaths for external templates as it currently stands in Angular 2.
 Using non-relative paths for external templates makes your components far less portable, since you need to manage all of the /where/is/my/template type references from the root that change depending on how deep your component is.
-That's why I would suggest that you keep your templates inside your components where they are easily found. Also, if you find that your inline template is getting large and unwieldy, then it is probably a sign that you should be breaking your component down into several smaller components, anyway.
+That's why I would suggest that you keep your templates inside your components where they are easily found. Also, if you find that your inline template is getting large and unwieldy, then it is probably a sign that you should be breaking your component down into several smaller components, anyway..."
+
+> Source: StackOverflow
 
 **My own opion is to keep Component Template as a inline html. This way we force ourself to keep component's code small.**
 
