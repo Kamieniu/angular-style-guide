@@ -452,6 +452,8 @@ These points should be covered:
     }
 ```
 ### Style modules should be as easy as it could be
+It's really important to keep our styles as easy and dummy as it could be. 
+
 ### Remember to use mixins, variables, parent relation (&)
 > Bad
 ```scss
@@ -502,9 +504,7 @@ These points should be covered:
 }
 ```
 
-
-
-- Media should be styled inside of the class
+### Media should be styled inside of the class
 > Bad
 ```scss
 @media (min-width: 320px) and (max-width: 991px) {
