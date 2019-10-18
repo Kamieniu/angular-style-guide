@@ -46,7 +46,7 @@ Files Structure should be divided, clear and understandable.
 ```
 
 - <a name="files-structure-and-name-conventions--containers"></a><a name="1.2"></a>[1.2](#files-structure-and-name-conventions--containers) **Containers**:
-  Containers are wrappers for components. They provice all API connections, pass data, etc.
+  Containers are wrappers for components. They provide all API connections, pass data, etc.
 
   Examples:
 
@@ -95,7 +95,7 @@ Files Structure should be divided, clear and understandable.
 
 - <a name="files-structure-and-name-conventions--modules"></a><a name="1.4"></a>[1.4](#files-structure-and-name-conventions--modules) **Modules**:
 
-  Modules are boxes 📦 for some piece of code. It allows to share component declaraions, pipes, modules between modules in the application.
+  Modules are boxes 📦 for some piece of code. It allows to share component declarations, pipes, modules between modules in the application.
 
 ```
   import { NgModule } from '@angular/core';
@@ -175,15 +175,61 @@ Files Structure should be divided, clear and understandable.
       }
 ```
 
-```javascript
+#### Usage:
+
+```angular2
 import { ServiceA } from "app/services";
 ```
+
+### If file is used in more than 2 places it should be placed in the root of the application and exported.
+Example: 
+
+```angular2
+// UserModel
+
+export class UserModel {
+    constructor(...){
+        // ...
+    }       
+}
+
+```
+
+```angular2
+// ComponentA
+import { UserModel } from '@app/models';
+
+...
+
+const user: UserModel = {...}
+
+```
+
+```angular2
+// ComponentB
+import { UserModel } from '@app/models';
+
+...
+
+const user: UserModel = {...}
+
+```
+
+```angular2
+// index.ts (in 'root/models')
+
+export { UserModel } from 'path/to/model`;
+// ...
+
+```
+
+
 
 **[⬆ back to top](#files-structure-and-name-conventions)**
 
 ## Creating new blocks - Angular CLI <a name="creating-new-blocks-angular-cli"></a><a name="2.0"></a>[1.1](#creating-new-blocks-angular-cli)
 
-Angular CLI is a powerfull tool. It does not only accelerates our work but also keep all files in the same "shape".
+Angular CLI is a powerful tool. It does not only accelerates our work but also keep all files in the same "shape".
 
 ### To generate component/group in our file structure
 
@@ -287,13 +333,13 @@ You get better code completion and inline support in your editor/IDE in most cas
 There is a convenience factor to having code and the associated HTML in the same file. It's easier to see how the two relate to each other.
 These two things will be of equal value for many people, so you'd just pick your favorite and move ahead with life if this were all there was to it.
 But that leads us to the reasons you should keep your templates in your components, in my opinion:
-It is difficult to make use of relative filepaths for external templates as it currently stands in Angular 2.
+It is difficult to make use of relative file paths for external templates as it currently stands in Angular 2.
 Using non-relative paths for external templates makes your components far less portable, since you need to manage all of the /where/is/my/template type references from the root that change depending on how deep your component is.
 That's why I would suggest that you keep your templates inside your components where they are easily found. Also, if you find that your inline template is getting large and unwieldy, then it is probably a sign that you should be breaking your component down into several smaller components, anyway..."
 
 > Source: StackOverflow
 
-**My own opion is to keep Component Template as a inline html. This way we force ourself to keep component's code small.**
+**My own opinion is to keep Component Template as a inline html. This way we force our self to keep component's code small.**
 
 > If you use VScode to produce code I suggest to install this extension:
 > https://marketplace.visualstudio.com/itemstemName=natewallace.angular2-inline
@@ -303,13 +349,182 @@ That's why I would suggest that you keep your templates inside your components w
 
 These points should be covered:
 
-- each component has own .scss/.css file
-- ViewEncapsulation is set on Native or Default,
-- Styles has separate file that's been imported
-- Styles uses BEM/OOCSS style guide
-- All frameworks are imported in main `styles.scss/.css` files
-- Class names are understandable
-- Do not query by Tag names
+### Each component has own .scss/.css file
+```angular2
+@Component({
+  selector: 'app-component',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
+})
+
+```
+
+
+### ViewEncapsulation is set on Native or Default, all global styles should be imported inside of the .scss files
+> Bad
+```angular2
+@Component({
+  selector: 'app-component',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
+  encapsulation: ViewEncapsulation.None
+})
+```
+> Good
+```angular2
+@Component({
+  selector: 'app-component',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
+})
+```
+```scss 
+/* app.component.scss */
+
+@import  'path/to/scss/file';
+
+// Use it here
+```
+### Styles use BEM/OOCSS style guide
+```scss
+.sidebar { 
+  // Styles
+    &__top {
+      // Styles 
+    }
+    &__center {
+      // Styles
+    }
+    &__bottom {
+      // Styles
+    }  
+}
+
+.top{
+  &__searchBox {
+    // Styles
+  }
+}
+
+.center { 
+  &__listOfFields {
+    // Styles  
+  } 
+}
+```
+### All framework styles are imported in main `styles.scss/.css` files
+```scss
+// style.scss (in root)
+
+@import "~bootstrap/dist/css/main.css";
+```
+### Class names are understandable
+> Bad
+```scss
+.someAweSomeButton {
+  // Styles   
+}
+```
+> Good
+```scss
+.submitButton {
+  // Styles 
+}
+```
+### Do not query by Tag names
+> Bad
+```scss
+    a {
+      // Styles 
+    }
+
+    p {
+      // Styles
+    }
+```
+> Good
+```scss
+    .link {
+      // Styles
+    }  
+    .article-paragraph {
+      // Styles      
+    }
+```
+### Style modules should be as easy as it could be
+### Remember to use mixins, variables, parent relation (&)
+> Bad
+```scss
+.cardTopInfoRow {
+  display: flex;
+  flex-direction: column;
+
+  .cardTopInfoRow__Top {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .cardTopInfoRow__topKey {
+      flex: 1;
+      font-size: $font-size-h2;
+      font-weight: $font-lite;
+      color: $font-light-color;
+    }
+
+    .ccardTopInfoRow__topValue {
+      font-size: $font-size-h1;
+      font-weight: $font-bold;
+    }
+  }
+}
+```
+> Good
+```scss
+.cardTopInfoRow {
+  display: flex;
+  flex-direction: column;
+
+  &_Top {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  &__topValue {
+      font-size: $font-size-h1;
+      font-weight: $font-bold;
+  }
+
+  &__topKey {
+      font-size: $font-size-h2;
+      color: $font-light-color;
+  }
+}
+```
+
+
+
+- Media should be styled inside of the class
+> Bad
+```scss
+@media (min-width: 320px) and (max-width: 991px) {
+    .class1 {
+    ...
+    }
+    .class2 {
+    ...
+    }
+}
+```
+> Good
+```scss
+  .class1 {
+    ...
+    @media (min-width: 320px) and (max-width: 991px) {
+    // Styles goes here
+    }
+  }
+```
 
 More: https://github.com/airbnb/css
 
@@ -357,7 +572,7 @@ ngOnDestroy() {
 ### Async Pipe
 
 Recommended way to handle Observables in HTML is using async pipes provided by angular.
-Async pipe automaticly unsubscribe if component is destroyed.
+Async pipe automatically unsubscribe if component is destroyed.
 
 ```javascript
 
@@ -379,7 +594,7 @@ public ngOnInit(): void {
 </ul>
 ```
 
-> Note: Always use trackBy function to avoid duplications or unnecessary re-rednering elements <a name="performance--trackBy"></a><a name="9.1">
+> Note: Always use trackBy function to avoid duplications or unnecessary re-rendering elements <a name="performance--trackBy"></a><a name="9.1">
 > More </a>
 
 ## Immutable <a name="immutable"></a><a name="7.0"></a>[7.0](#immutable)
