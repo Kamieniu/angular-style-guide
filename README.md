@@ -17,7 +17,7 @@
 10. [Testing](#testing)
 11. [PWA](#PWA)
 12. [TSLint](#tslint)
-13. [Classes & Constructors](#classes--constructors)
+13. [Sharing Modules/Components](#sharing-modules-components)
 
 ## Files Structure and Name Conventions <a name="files-structure-and-name-conventions"></a><a name="1.1"></a>[1.1](#files-structure-and-name-conventions)
 
@@ -341,7 +341,7 @@ That's why I would suggest that you keep your templates inside your components w
 
 **My own opinion is to keep Component Template as a inline html. This way we force our self to keep component's code small.**
 
-> If you use VScode to produce code I suggest to install this extension:
+> If you use VSCode to produce code I suggest to install this extension:
 > https://marketplace.visualstudio.com/itemstemName=natewallace.angular2-inline
 > that helps you to format HTML code in your .ts files
 
@@ -840,6 +840,8 @@ https://web.dev/precaching-with-the-angular-service-worker/
 
 Project should have configured TSLint to provide the best code quality.
 https://www.npmjs.com/package/angular-tslint-rules
+
+## Sharing Modules & Components <a name="sharing-modules-components"></a><a name="13"></a>[13](#sharing-modules-components)
 
 ## License
 
