@@ -1,25 +1,125 @@
 # Angular Style Guide
 
-> A mostly reasonable approach to build Angular applications
-> **Note**: These rules are only (in my opinion) the best way to keep your code semantic, clean and readable.
-
 ## Table of Contents
+1. Starting a new project
+2. Additional Tools.
+3. Files Structure and Name Conventions
+4. Creating new blocks - Angular CLI
+5. Public API
+6. HTML Templates
+8. Semantic HTML
+7. Styles
+8. RxJS
+9. Immutable
+10. Types and Interfaces
+11. Performance
+12. Testing
+13. PWA
 
-1. [Files Structure and Name Conventions](#files-structure-and-name-conventions):
-2. [Creating new blocks - Angular CLI](#creating-new-blocks-angular-cli)
-3. [Public API](#public-api)
-4. [HTML Templates](#html-templates)
-5. [Styles](#styles)
-6. [RxJS](#rxjs)
-7. [Immutable](#immutable)
-8. [Types and Interfaces](#types-and-interfaces)
-9. [Performance](#performance)
-10. [Testing](#testing)
-11. [PWA](#PWA)
-12. [TSLint](#tslint)
-13. [Sharing Modules/Components](#sharing-modules-components)
 
-## Files Structure and Name Conventions <a name="files-structure-and-name-conventions"></a><a name="1.1"></a>[1.1](#files-structure-and-name-conventions)
+
+## Starting a new project 
+Make sure you are using latest AngularCLI.
+
+Run `ng new` in your terminal.
+
+Make sure you choose SCSS as a style preprocessor.
+
+Recomended schematics for Angular Component:
+
+```json
+"@schematics/angular:component": {
+  "style": "scss",
+   "changeDetection": "OnPush"
+ }
+```
+
+
+Angular set `app` as a default  prefix for Components and Directvies.
+
+If you need to change it:
+
+Ex: for `ui`
+```json"
+prefix": "ui",
+```
+ 
+ 
+ 
+## Additional Tools
+
+### 1. Husky
+Husky can prevent bad git commit, git push and more 🐶 woof!
+
+Why?
+1. To add some additional steps / tasks to do before/after commit/push. (ex. run tests)
+2. To avoid bad commits. You can connect any Commit linter to check commit messages. 
+    
+    ex:
+    ```json
+      "husky": {
+        "hooks": {
+          "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+          "pre-push": "npm run test-headless"
+        }
+      }
+    ```
+
+### 3. Conventional Commits
+
+The Conventional Commits specification is a lightweight convention on top of commit messages. It provides an easy set of rules for creating an explicit commit history; which makes it easier to write automated tools on top of. 
+
+This convention dovetails with SemVer, by describing the features, fixes, and breaking changes made in commit messages. 
+
+The commit message should be structured as follows:
+```bash
+    <type>[optional scope]: <description>
+    [optional body]
+    [optional footer(s)]
+```
+   
+ex:
+```bash
+   feat: allow provided config object to extend other configs
+   
+   BREAKING CHANGE: `extends` key in config file is now used for extending other config files
+```
+   
+   Why?
+   
+   Provides a readable way of creating commit massages. No more "added some stuff" commits.
+   
+   **The same approach is also used by Angular Core Team.**
+
+### 4. Linter 
+It could be either TSLint (already included) or ESLint.
+    
+WARNING 
+    
+TSLint has been officially Deprecated and Migrating TSLint to ESLint is planned for Angular 10.
+    
+Recommended rules packages:
+
+* Angular TSLint Rules https://github.com/fulls1z3/angular-tslint-rules
+* TSConfig Prettier https://github.com/prettier/tslint-config-prettier
+
+### 5. Prettier
+
+Prettier is an opinionated code formatter. It enforces a consistent style by parsing your code and re-printing it with its own rules that take the maximum line length into account, wrapping code when necessary.
+   
+ex: `.prettierrc`
+
+```json
+   {
+     "tabWidth": 2,
+     "useTabs": false,
+     "singleQuote": true,
+     "trailingComma": "all",
+     "bracketSpacing": true
+   }
+```
+
+## Files Structure and Name Conventions [2](#files-structure-and-name-conventions)
 
 ### Structure
 
@@ -32,12 +132,14 @@ Files Structure should be divided, clear and understandable.
   |- Components
   |-- [component-name]
   |--- [component-name].component.ts
+  |--- [component-name].component.html
   |--- [component-name].component.spec.ts
   |--- [component-name].component.scss
   |--- [component-name].module.ts
   ... or //
   |-- [group-name]
   |---- [component-name].component.ts
+  |---- [component-name].component.html
   |---- [component-name].component.spec.ts
   |---- [component-name].component.scss
   |--- [group-name].module.ts
@@ -59,11 +161,13 @@ Files Structure should be divided, clear and understandable.
   |- Containers
   |-- B-name
   |--- b-name.component.ts
+  |--- b-name.component.html
   |--- b-name.component.spec.ts
   |--- b-name.component.scss
   |--- b-name.module.ts
   |-- B-name
   |--- b-name.component.ts
+  |--- b-name.component.html
   |--- b-name.component.spec.ts
   |--- b-name.component.scss
   |--- b-name.module.ts
@@ -81,12 +185,14 @@ Files Structure should be divided, clear and understandable.
   |-- [page-name]-view
   |--- [page-name]-routing.module.ts
   |--- [page-name].component.ts
+  |--- [page-name].component.html
   |--- [page-name].component.spec.ts
   |--- [page-name].component.scss
   |--- [page-name].module.ts
   |-- [page-name]-view
   |--- [page-name]-routing.module.ts
   |--- [page-name].component.ts
+  |--- [page-name].component.html
   |--- [page-name].component.spec.ts
   |--- [page-name].component.scss
   |--- [page-name].module.ts
@@ -157,13 +263,17 @@ Files Structure should be divided, clear and understandable.
 
 ```bash
   |- Interfaces
-  |-- [interface-name]
-  |--- [interface-name].interface.ts
+  |-- [namespace-name]
+  |--- [interface-name-one].interface.ts
+  |--- [interface-name-two].interface.ts
   ...
   |-- index.ts (public api export)
 ```
 
 **Export**: All files should be exported by `index.ts`.
+
+
+#### OPTIONAL
 
 **Access**:`tsconfig.json` should have applied aliases for paths.
 
@@ -181,49 +291,6 @@ Files Structure should be divided, clear and understandable.
 import { ServiceA } from "app/services";
 ```
 
-### If file is used in more than 2 places it should be placed in the root of the application and exported.
-Example: 
-
-```angular2
-// UserModel
-
-export class UserModel {
-    constructor(...){
-        // ...
-    }       
-}
-
-```
-
-```angular2
-// ComponentA
-import { UserModel } from '@app/models';
-
-...
-
-const user: UserModel = {...}
-
-```
-
-```angular2
-// ComponentB
-import { UserModel } from '@app/models';
-
-...
-
-const user: UserModel = {...}
-
-```
-
-```angular2
-// index.ts (in 'root/models')
-
-export { UserModel } from 'path/to/model`;
-// ...
-
-```
-
-
 
 **[⬆ back to top](#files-structure-and-name-conventions)**
 
@@ -233,31 +300,20 @@ Angular CLI is a powerful tool. It does not only accelerates our work but also k
 
 ### To generate component/group in our file structure
 
+ex: Shared buttons:
 ```bash
-ng g m components/buttons
-ng g c components/buttons/defaultButton -t --style=scss
+ng g m shared/components/buttons/primary-button
+ng g c shared/components/buttons/primary-button
 ```
 
-### To generate containers in our file structure
-
-```bash
-ng g m containers/buttons
-ng g c components/buttons/defaultButton -t --style=scss
-```
+Recommended to use 1 Module for 1 Component.
 
 ### To generate services in our file structure
 
 > Unfortunately Angular CLI doesn't support creating folders for services. You need to do it manually
 
 ```bash
-mkdir services/[service-purpose]
-ng g s services/[service-name]
-```
-
-### To generate Interface in our file structure
-
-```bash
-ng g i interfaces/[interface-name]
+ng g s services/[service-name-folder]/[service-name]
 ```
 
 ### ... and so one. Remember to use Angular CLI while you creating some new block!
@@ -339,7 +395,7 @@ That's why I would suggest that you keep your templates inside your components w
 
 > Source: StackOverflow
 
-**My own opinion is to keep Component Template as a inline html. This way we force our self to keep component's code small.**
+**My own opinion is to keep Component Template as a inline html. This way we force our self to keep component's code small.** - @Frank
 
 > If you use VSCode to produce code I suggest to install this extension:
 > https://marketplace.visualstudio.com/itemstemName=natewallace.angular2-inline
@@ -385,7 +441,34 @@ These points should be covered:
 
 // Use it here
 ```
-### Styles use BEM/OOCSS style guide
+### Styles use BEM/OOCSS/Atomic style guide.
+
+Unless your project is based on some UI Framework.
+```html
+<aside class="sidebar">
+    <div class="sidebar__top top">
+        <div class="top__search-box">
+        
+        </div>
+        <!-- Some Logo Here -->
+    </div>
+    <div class="sidebar__center center">
+        <div class="center__list-of-fields">
+        
+        </div>
+        <!-- Some Navigation Here -->
+    </div>
+    <div class="sidebar__bottom">
+        <!-- Some Actions Here -->
+    </div>
+</aside>
+
+
+
+
+```
+
+
 ```scss
 .sidebar { 
   // Styles
@@ -412,6 +495,14 @@ These points should be covered:
   } 
 }
 ```
+
+Other:
+* Angular Material
+* Bootstrap
+* Tailwindcss
+* Others
+
+
 ### All framework styles are imported in main `styles.scss/.css` files
 ```scss
 // style.scss (in root)
@@ -427,7 +518,7 @@ These points should be covered:
 ```
 > Good
 ```scss
-.submitButton {
+.submit-button {
   // Styles 
 }
 ```
@@ -451,29 +542,43 @@ These points should be covered:
       // Styles      
     }
 ```
+
+### Awoid to tested styles
+> Bad
+```scss
+    .link {
+      .link-url{
+        .link-button {
+         
+        }         
+      }   
+    } 
+```
+If you have this kind of nestings. That means you need to fix your HTML Classes.
+
 ### Style modules should be as easy as it could be
 It's really important to keep our styles as easy and dummy as it could be. 
 
 ### Remember to use mixins, variables, parent relation (&)
 > Bad
 ```scss
-.cardTopInfoRow {
+.card-top-info {
   display: flex;
   flex-direction: column;
 
-  .cardTopInfoRow__Top {
+  .card-top-info__top {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
 
-    .cardTopInfoRow__topKey {
+    .card-top-info__top__key {
       flex: 1;
       font-size: $font-size-h2;
       font-weight: $font-lite;
       color: $font-light-color;
     }
 
-    .ccardTopInfoRow__topValue {
+    .card-top-info__top__value {
       font-size: $font-size-h1;
       font-weight: $font-bold;
     }
@@ -482,22 +587,22 @@ It's really important to keep our styles as easy and dummy as it could be.
 ```
 > Good
 ```scss
-.cardTopInfoRow {
+.card-top-info__top {
   display: flex;
   flex-direction: column;
 
-  &_Top {
+  &_top {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
   }
 
-  &__topValue {
+  &__top-value {
       font-size: $font-size-h1;
       font-weight: $font-bold;
   }
 
-  &__topKey {
+  &__top-key {
       font-size: $font-size-h2;
       color: $font-light-color;
   }
@@ -710,16 +815,16 @@ Most important method to increase an application performance. In shortcut, chang
 })
 ```
 
-### Testing <a name="testing"></a><a name="10"></a>[10](#testing)
+### Testing
 
 To avoid bugs while developing features important is to write Unit & Integrations tests.
 
 Instead of using build in config we can easily use
-a NPM package (https://github.com/getsaf/shallow-render)
+a NPM package (https://github.com/ngneat/spectatorr)
 
 Instead of doing this:
 
-```javascript
+```typescript
 describe("MyComponent", () => {
 	beforeEach(async => {
 		return TestBed.configureTestModule({
@@ -781,35 +886,36 @@ class TestHostComponent {
 
 we can easily do this
 
-```javascript
-describe("MyComponent", () => {
-	let shallow: Shallow<MyComponent>;
+```typescript
+import { Spectator, createComponentFactory } from '@ngneat/spectator';
+import { ButtonComponent } from './button.component';
 
-	beforeEach(() => {
-		shallow = new Shallow(MyComponent, MyModule);
-	});
+describe('ButtonComponent', () => {
+  let spectator: Spectator<ButtonComponent>;
+  const createComponent = createComponentFactory(ButtonComponent);
 
-	it("renders a link with the provided label text", async () => {
-		const { find } = await shallow.render({ bind: { linkText: "my text" } });
-		// or shallow.render(`<my-component linkText="my text"></my-component>`);
+  beforeEach(() => spectator = createComponent());
 
-		expect(find("a").nativeElement.innerText).toBe("my text");
-	});
+  it('should have a success class by default', () => {
+    expect(spectator.query('button')).toHaveClass('success');
+  });
 
-	it('sends "foo" to bound click events', async () => {
-		const { element, outputs } = await shallow.render();
-		element.click();
-
-		expect(outputs.handleClick).toHaveBeenCalledWith("foo");
-	});
+  it('should set the class name according to the [className] input', () => {
+    spectator.setInput('className', 'danger');
+    expect(spectator.query('button')).toHaveClass('danger');
+    expect(spectator.query('button')).not.toHaveClass('success');
+  });
 });
 ```
+
+
+#### It doesn't matter what approach will you choose. Important is to provide best code quality and code coverage.
 
 ### Each component should have at least Unit tests to cover all methods.
 
 > **We expect to have at least 80-85% test coverage.**
 
-## PWA <a name="pwa"></a><a name="11"></a>[11](#pwa)
+## PWA 
 
 > source
 > https://angular.io/guide/service-worker-intro > https://developers.google.com/web/progressive-web-apps/
@@ -836,36 +942,8 @@ Create app icons in the `src/assets` directory.
 
 https://web.dev/precaching-with-the-angular-service-worker/
 
-## TSLint <a name="tslint"></a><a name="12"></a>[12](#tslint)
-
-Project should have configured TSLint to provide the best code quality.
-https://www.npmjs.com/package/angular-tslint-rules
-
-## Sharing Modules & Components <a name="sharing-modules-components"></a><a name="13"></a>[13](#sharing-modules-components)
-
 ## License
 
-(The MIT License)
-
-Copyright (c) 2012 Franciszek Stodulski
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Copyright (c) 2020 Franciszek Stodulski
 
 **[⬆ back to top](#table-of-contents)**
